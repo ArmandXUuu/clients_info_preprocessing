@@ -2,3 +2,4 @@
 *.xlsx
 *.csv
 .history/*
+__pycache__/*
