@@ -125,6 +125,7 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
                 ends_SD = input("Is this name ends with an SD, which is not correct ? (y/n)")
                 if ends_SD == 'y':
                     client_tmp.name = client_tmp.name.rstrip("SD")
+                    clients.identity = "SD"
             if sys.argv[1] == '-ib' and len(row_tmp[2]) != 6 and (row_tmp[2] not in ["MR", "MRS", "CHD", "INF", "SD", "MS"]):
                 if row_tmp[2] == '+':
                     espace_exists = "y"
