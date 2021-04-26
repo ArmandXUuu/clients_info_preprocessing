@@ -118,6 +118,10 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
         if start_person.match(row) != None or start_person_Car.match(row) != None: #Means a new person comes
             clients.append(client_tmp)
             client_tmp = Client()
+
+            client_tmp.gender = process_gender(row)
+            client_tmp.identity = process_identity(row)
+
             client_tmp.number = row_tmp[0]
             client_tmp.name = row_tmp[1]
             if sys.argv[1] == '-ib' and ends_with_SD.match(client_tmp.name):
@@ -139,9 +143,6 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
             else:
                 client_tmp.buffer1 = row_tmp[2]
                 client_tmp.buffer2 = row_tmp[3]
-
-            client_tmp.gender = process_gender(row)
-            client_tmp.identity = process_identity(row)
         else :
             if start_OSI.match(row) != None:
                 client_tmp.communications.append(row_tmp[2::])
