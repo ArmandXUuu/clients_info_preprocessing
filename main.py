@@ -2,6 +2,7 @@ import csv
 import re
 import sys
 from openpyxl import load_workbook, Workbook
+import finish
 
 class Client:
     def __init__(self):
@@ -43,7 +44,7 @@ def collect_files():
         file_names = ['input.csv']
     else:
         file_names = sys.argv[1::]
-    return file_names
+    return len(sys.argv) - 1, file_names
 
 def read_from_csv(input_file = 'input.csv'):
     with open(input_file,'r', encoding="utf-8") as csvfile:
@@ -134,14 +135,15 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
             
     clients.append(client_tmp)
     write_to_xl(clients, output_file)
+    finish.finish(output_file)
 
 def main():
-    file_names = collect_files()
+    file_number, file_names = collect_files()
     for file_name in file_names:
         file_name_tmp = file_name.rstrip('.xlsx')
         process(file_name, file_name_tmp + '_out.xlsx')
     
-    print("Thank you for using, processing complete.")
+    print("Thank you for using, processing complete. " + str(file_number) + " files procesed.")
 
 if __name__ == '__main__':
     main()
