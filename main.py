@@ -1,6 +1,7 @@
 import csv
 import re
 import sys
+from openpyxl import load_workbook, Workbook
 
 class Client:
     def __init__(self):
@@ -12,6 +13,18 @@ class Client:
         self.is_student = "N"
         self.buffer1 = None
         self.buffer2 = None
+
+    def communications_to_string(self):
+        tmp = []
+        for com in self.communications:
+            tmp.append(" ".join(com))
+        return '; '.join(tmp)
+
+    def susp_communications_to_string(self):
+        tmp = []
+        for com in self.suspecious_communications:
+            tmp.append(" ".join(com))
+        return ''.join(tmp)
 
 def process_gender(row):
     MR_pattern = re.compile(r'^.* MR .*$')
@@ -33,11 +46,24 @@ def collect_files():
     return file_names
 
 def read_from_csv(input_file = 'input.csv'):
-    #input_file = sys.arg 
     with open(input_file,'r', encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile)
         strTmp = ""
         rows = [re.sub(' +', ' ', str.lstrip(strTmp.join(row))) for row in reader]
+    return rows
+
+def read_from_xl(input_file = 'test.xlsx'):
+    wb = load_workbook(input_file)
+    first_column = wb[wb.sheetnames[0]]['A']
+    rows = []
+    for r in range(len(first_column)):
+        if type(first_column[r].value) == int:
+            pre_string = str(first_column[r].value)
+        else:
+            pre_string = first_column[r].value
+        row = re.sub(' +', ' ', pre_string.lstrip())
+
+        rows.append(row)
     return rows
 
 def write_to_csv(clients, ouput_file = 'output.csv'):
@@ -47,8 +73,35 @@ def write_to_csv(clients, ouput_file = 'output.csv'):
     for client in clients:
         csv_writer.writerow([client.number, client.gender, client.name, client.buffer1, client.buffer2, client.is_student, client.communications, client.suspecious_communications])
 
-def process(input_file = "input.csv", output_file = "output.csv"):
-    rows = read_from_csv(input_file)
+def write_to_xl(clients, output_file = 'output.xlsx'):
+    output = Workbook()
+    sheet = output.active
+
+    sheet['A1'] = 'number'
+    sheet['B1'] = 'gender'
+    sheet['C1'] = 'name'
+    sheet['D1'] = 'buffer1'
+    sheet['E1'] = 'buffer2'
+    sheet['F1'] = 'is_student'
+    sheet['G1'] = 'contact'
+    sheet['H1'] = 'suspecious_contact'
+    i = 2
+
+    for client in clients:
+        sheet['A'+str(i)] = client.number
+        sheet['B'+str(i)] = client.gender
+        sheet['C'+str(i)] = client.name
+        sheet['D'+str(i)] = client.buffer1
+        sheet['E'+str(i)] = client.buffer2
+        sheet['F'+str(i)] = client.is_student
+        sheet['G'+str(i)] = client.communications_to_string()
+        sheet['H'+str(i)] = client.susp_communications_to_string()
+        i += 1
+    
+    output.save(output_file)
+
+def process(input_file = "input.xlsx", output_file = "output.xlsx"):
+    rows = read_from_xl(input_file)
 
     start_person = re.compile(r'^\d\d\d .*')
     start_person_Car = re.compile(r'^\d\d\d[A-Z] .*')
@@ -80,13 +133,13 @@ def process(input_file = "input.csv", output_file = "output.csv"):
                 client_tmp.suspecious_communications = row
             
     clients.append(client_tmp)
-    write_to_csv(clients, output_file)
+    write_to_xl(clients, output_file)
 
 def main():
     file_names = collect_files()
     for file_name in file_names:
-        file_name_tmp = file_name.rstrip('.csv')
-        process(file_name, file_name_tmp + '_out.csv')
+        file_name_tmp = file_name.rstrip('.xlsx')
+        process(file_name, file_name_tmp + '_out.xlsx')
     
     print("Thank you for using, processing complete.")
 
