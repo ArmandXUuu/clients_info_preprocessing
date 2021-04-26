@@ -107,6 +107,7 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
     start_OSI = re.compile(r'^OSI.*')
     pure_numbers = re.compile(r'^\d.*')
     six_reservation_code = re.compile(r'[A-Za-z0-9]{6}')
+    ends_with_SD = re.compile(r'.*SD$')
     
     row = None
     clients = []
@@ -119,11 +120,16 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
             client_tmp = Client()
             client_tmp.number = row_tmp[0]
             client_tmp.name = row_tmp[1]
+            if sys.argv[1] == '-ib' and ends_with_SD.match(client_tmp.name):
+                print("\n" + client_tmp.name)
+                ends_SD = input("Is this name ends with an SD, which is not correct ? (y/n)")
+                if ends_SD == 'y':
+                    client_tmp.name = client_tmp.name.rstrip("SD")
             if sys.argv[1] == '-ib' and len(row_tmp[2]) != 6 and (row_tmp[2] not in ["MR", "MRS", "CHD", "INF", "SD", "MS"]):
                 if row_tmp[2] == '+':
                     espace_exists = "y"
                 else:
-                    print(" ".join(row_tmp[0:2:]), "< " + row_tmp[2] + " >", " ".join(row_tmp[3::]))
+                    print("\n" + " ".join(row_tmp[0:2:]), "< " + row_tmp[2] + " >", " ".join(row_tmp[3::]))
                     espace_exists = input("Is there an espace in his/her name ? (y/n)")
                 if espace_exists == "y":
                     client_tmp.name = client_tmp.name + row_tmp[2]
