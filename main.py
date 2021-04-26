@@ -11,7 +11,7 @@ class Client:
         self.communications = []
         self.gender = None
         self.suspecious_communications = []
-        self.is_student = "N"
+        self.identity = ""
         self.buffer1 = None
         self.buffer2 = None
 
@@ -39,19 +39,24 @@ def process_gender(row):
         return "MRS"
     return None
 
+def process_identity(row):
+    SD_pattern = re.compile(r'^.* SD .*$')
+    CHD_pattern = re.compile(r'^.* CHD .*$')
+    INF_pattern = re.compile(r'^.* INF .*$')
+    if SD_pattern.match(row) != None:
+        return "SD"
+    if CHD_pattern.match(row) != None:
+        return "CHD"
+    if INF_pattern.match(row) != None:
+        return "INF"
+    return None
+
 def collect_files():
-    if len(sys.argv) - 1 == 0:
+    if len(sys.argv) - 2 == 0 or sys.argv[1] == '-n':
         file_names = ['input.csv']
     else:
-        file_names = sys.argv[1::]
-    return len(sys.argv) - 1, file_names
-
-def read_from_csv(input_file = 'input.csv'):
-    with open(input_file,'r', encoding="utf-8") as csvfile:
-        reader = csv.reader(csvfile)
-        strTmp = ""
-        rows = [re.sub(' +', ' ', str.lstrip(strTmp.join(row))) for row in reader]
-    return rows
+        file_names = sys.argv[2::]
+    return len(sys.argv) - 2, file_names
 
 def read_from_xl(input_file = 'test.xlsx'):
     wb = load_workbook(input_file)
@@ -67,13 +72,6 @@ def read_from_xl(input_file = 'test.xlsx'):
         rows.append(row)
     return rows
 
-def write_to_csv(clients, ouput_file = 'output.csv'):
-    f = open(ouput_file, 'w', encoding='utf-8')
-    csv_writer = csv.writer(f)
-    csv_writer.writerow(["number","gender","name","buffer1",'buffer2',"is_student","contact","suspecious_contact"])
-    for client in clients:
-        csv_writer.writerow([client.number, client.gender, client.name, client.buffer1, client.buffer2, client.is_student, client.communications, client.suspecious_communications])
-
 def write_to_xl(clients, output_file = 'output.xlsx'):
     output = Workbook()
     sheet = output.active
@@ -83,7 +81,7 @@ def write_to_xl(clients, output_file = 'output.xlsx'):
     sheet['C1'] = 'name'
     sheet['D1'] = 'buffer1'
     sheet['E1'] = 'buffer2'
-    sheet['F1'] = 'is_student'
+    sheet['F1'] = 'identity'
     sheet['G1'] = 'contact'
     sheet['H1'] = 'suspecious_contact'
     i = 2
@@ -94,7 +92,7 @@ def write_to_xl(clients, output_file = 'output.xlsx'):
         sheet['C'+str(i)] = client.name
         sheet['D'+str(i)] = client.buffer1
         sheet['E'+str(i)] = client.buffer2
-        sheet['F'+str(i)] = client.is_student
+        sheet['F'+str(i)] = client.identity
         sheet['G'+str(i)] = client.communications_to_string()
         sheet['H'+str(i)] = client.susp_communications_to_string()
         i += 1
@@ -109,7 +107,6 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
     start_OSI = re.compile(r'^OSI.*')
     pure_numbers = re.compile(r'^\d.*')
     six_reservation_code = re.compile(r'[A-Za-z0-9]{6}')
-    is_student = re.compile(r'^.* SD .*$')
     
     row = None
     clients = []
@@ -122,11 +119,22 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
             client_tmp = Client()
             client_tmp.number = row_tmp[0]
             client_tmp.name = row_tmp[1]
-            client_tmp.buffer1 = row_tmp[2]
-            client_tmp.buffer2 = row_tmp[3]
+            if sys.argv[1] == '-ib' and len(row_tmp[2]) != 6 and (row_tmp[2] not in ["MR", "MRS", "CHD", "INF", "SD", "MS"]):
+                if row_tmp[2] == '+':
+                    espace_exists = "y"
+                else:
+                    print(" ".join(row_tmp[0:2:]), "< " + row_tmp[2] + " >", " ".join(row_tmp[3::]))
+                    espace_exists = input("Is there an espace in his/her name ? (y/n)")
+                if espace_exists == "y":
+                    client_tmp.name = client_tmp.name + row_tmp[2]
+                    client_tmp.buffer1 = row_tmp[3]
+                    client_tmp.buffer2 = row_tmp[4]
+            else:
+                client_tmp.buffer1 = row_tmp[2]
+                client_tmp.buffer2 = row_tmp[3]
+
             client_tmp.gender = process_gender(row)
-            if is_student.match(row) != None:
-                client_tmp.is_student = "Y"
+            client_tmp.identity = process_identity(row)
         else :
             if start_OSI.match(row) != None:
                 client_tmp.communications.append(row_tmp[2::])

@@ -4,17 +4,28 @@
  @ArmandXUuu 11 avr 2021
  Rosière-prés-Troyes
 
-## Pour commencer
+## Introduction des trois modes
 
-1. Renommez le fichier `xxx.xlsx` en `input.csv`
+1. `-n`
+Mode normal, le programme cherchera le file `input.xlsx` dans le répertoire.
 
-2. Exécutez la commande
-
-```bash
-python3 main.py
+```python
+python3 main.py -n
 ```
 
-3. Done ! Le résultat se trouve dans le même répertoire nommé `output.csv`
+2. `-b`
+Mode batch, le programme va traiter les fichiers suivant la commande.
+
+```python
+python3 main.py -b file1.xlsx file2.xlsx ...
+```
+
+3. `-ib`
+Mode interactive et batch, recommandé, vous allez devoir voir s'il y a un espace entre le nom du client.
+
+```python
+python3 main.py -ib file1.xlsx file2.xlsx ...
+```
 
 ## Attention
 
