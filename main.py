@@ -117,7 +117,8 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
 
     for row in rows:
         row_tmp = str.split(row, " ")
-        if start_person.match(row) != None or start_person_Car.match(row) != None: #Means a new person comes
+        # when a new person comes
+        if start_person.match(row) != None or start_person_Car.match(row) != None: 
             clients.append(client_tmp)
             client_tmp = Client()
 
@@ -125,34 +126,41 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
             client_tmp.identity = process_identity(row)
 
             client_tmp.number = row_tmp[0]
+
+            # client.name & client.buffer
             client_tmp.name = row_tmp[1]
+            # an exception when SD is just behind his/her name
             if sys.argv[1] == '-ib' and ends_with_SD.match(client_tmp.name):
                 print("\n" + client_tmp.name)
-                ends_SD = input("Is this name ends with an SD, which is not correct ? (y/n)")
+                ends_SD = input("Is this name ends with an SD, which is not correct ? (y/n) ")
                 if ends_SD == 'y':
                     client_tmp.name = client_tmp.name.rstrip("SD")
                     client_tmp.identity = "SD"
+            # try to correct clients' names (an espace between them)
             if sys.argv[1] == '-ib' and len(row_tmp[2]) != 6 and (row_tmp[2] not in ["MR", "MRS", "CHD", "INF", "SD", "MS"]):
                 if row_tmp[2] == '+':
                     espace_exists = "y"
                 else:
                     print("\n" + " ".join(row_tmp[0:2:]), "< " + row_tmp[2] + " >", " ".join(row_tmp[3::]))
-                    espace_exists = input("Is there an espace in his/her name ? (y/n)")
+                    espace_exists = input("Is there an espace in his/her name ? (y/n) ")
                 if espace_exists == "y":
                     client_tmp.name = client_tmp.name + row_tmp[2]
                     client_tmp.buffer1 = row_tmp[3]
                     client_tmp.buffer2 = row_tmp[4]
-            if name_style == 'pure':
-                client_tmp.name = client_tmp.name.lstrip('1').lstrip('2').replace('/', '')
             else:
                 client_tmp.buffer1 = row_tmp[2]
                 client_tmp.buffer2 = row_tmp[3]
+            # change the name output style
+            if name_style == 'pure':
+                client_tmp.name = client_tmp.name.lstrip('1').lstrip('2').replace('/', '')
+
+        # still adding information to this client_tmp
         else :
             if start_OSI.match(row) != None:
                 client_tmp.communications.append(row_tmp[2::])
             elif (pure_numbers.match(row) != None):
                 client_tmp.suspecious_communications = row
-            
+
     clients.append(client_tmp)
     write_to_xl(clients, output_file)
     finish.finish(output_file)
@@ -172,7 +180,7 @@ def main():
         file_name_tmp = file_name.rstrip('.xlsx')
         process(file_name, file_name_tmp + '_out.xlsx')
     
-    print("Thank you for using, processing complete. " + str(file_number) + " files procesed.")
+    print("\nThank you for using, processing complete. " + str(file_number) + " files procesed.")
 
 if __name__ == '__main__':
     main()
