@@ -4,6 +4,8 @@ import sys
 from openpyxl import load_workbook, Workbook
 import finish
 
+name_style = 'pure'
+
 class Client:
     def __init__(self):
         self.name = None
@@ -140,6 +142,8 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
                     client_tmp.name = client_tmp.name + row_tmp[2]
                     client_tmp.buffer1 = row_tmp[3]
                     client_tmp.buffer2 = row_tmp[4]
+            if name_style == 'pure':
+                client_tmp.name = client_tmp.name.lstrip('1').lstrip('2').replace('/', '')
             else:
                 client_tmp.buffer1 = row_tmp[2]
                 client_tmp.buffer2 = row_tmp[3]
@@ -153,7 +157,16 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
     write_to_xl(clients, output_file)
     finish.finish(output_file)
 
+def init():
+    global name_style
+    print("Please choose a sytle for name output:")
+    print("\t1. 1ZHANG/SAN\t2. ZHANGSAN")
+    inp = input("Please enter 1 or 2: ")
+    if inp == "1":
+        name_style = 'complex'
+
 def main():
+    init()
     file_number, file_names = collect_files()
     for file_name in file_names:
         file_name_tmp = file_name.rstrip('.xlsx')
