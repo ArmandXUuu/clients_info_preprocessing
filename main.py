@@ -105,6 +105,7 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
     rows = read_from_xl(input_file)
 
     start_person = re.compile(r'^\d\d\d .*')
+    no_start_person = re.compile(r'^\d\d\d \d\d.*') # une exception bizarre : "236 9898 A"
     start_person_Car = re.compile(r'^\d\d\d[A-Z] .*')
     start_OSI = re.compile(r'^OSI.*')
     pure_numbers = re.compile(r'^\d.*')
@@ -118,7 +119,7 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
     for row in rows:
         row_tmp = str.split(row, " ")
         # when a new person comes
-        if start_person.match(row) != None or start_person_Car.match(row) != None: 
+        if (start_person.match(row) != None or start_person_Car.match(row) != None) and no_start_person.match(row) == None: 
             clients.append(client_tmp)
             client_tmp = Client()
 
