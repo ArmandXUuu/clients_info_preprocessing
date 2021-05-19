@@ -167,16 +167,19 @@ def process(input_file = "input.xlsx", output_file = "output.xlsx"):
     finish.finish(output_file)
 
 def init():
+    file_number, file_names = collect_files()
+
     global name_style
     print("Please choose a sytle for name output:")
     print("\t1. 1ZHANG/SAN\t2. ZHANGSAN")
     inp = input("Please enter 1 or 2: ")
     if inp == "1":
         name_style = 'complex'
+    
+    return file_number, file_names
 
 def main():
-    init()
-    file_number, file_names = collect_files()
+    file_number, file_names = init()
     for file_name in file_names:
         file_name_tmp = file_name.rstrip('.xlsx')
         process(file_name, file_name_tmp + '_out.xlsx')
