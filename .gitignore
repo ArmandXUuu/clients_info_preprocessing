@@ -3,3 +3,5 @@
 *.csv
 .history/*
 __pycache__/*
+datas/*
+.DS_Store
